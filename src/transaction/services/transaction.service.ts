@@ -3,13 +3,19 @@ import { TransactionWebhookDto } from '../dtos/transaction-webhook.dto';
 import { EmailService } from 'src/email/services/email.service';
 import { EMAIL_TEMPLATES } from 'src/email/constants/email.constant';
 import { TRANSACTION_TYPE } from '../constants/transaction.constant';
+import { AppLogger } from 'src/shared/logger/logger.service';
 
 @Injectable()
 export class TransactionService {
-  constructor(private readonly emailService: EmailService) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly emailService: EmailService,
+  ) {
+    this.logger.setContext(TransactionService.name);
+  }
 
   async processTransaction(transaction: TransactionWebhookDto): Promise<void> {
-    const { type } = transaction;
+    const { type, amount } = transaction;
 
     let emailSubject = 'Transaction Processed';
     let emailTemplate = EMAIL_TEMPLATES.TRANSACTION_SUCCESS;
@@ -23,10 +29,19 @@ export class TransactionService {
         transaction.userEmail,
         emailSubject,
         emailTemplate,
-        { amount: transaction.amount },
+        { amount },
       );
+
+      this.logger.debug('Transaction processed successfully', {
+        userEmail: transaction.userEmail,
+        amount,
+        type,
+      });
     } catch (error) {
-      console.error('Error processing transaction:', error);
+      this.logger.error(
+        'Error processing transaction',
+        error as Record<string, any>,
+      );
       throw new Error('Failed to process transaction. Please try again later.');
     }
   }

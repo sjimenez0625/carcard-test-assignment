@@ -3,10 +3,16 @@ import { MailerService } from '@nestjs-modules/mailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import { EMAIL_TEMPLATES } from '../constants/email.constant';
+import { AppLogger } from 'src/shared/logger/logger.service';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly mailerService: MailerService,
+  ) {
+    this.logger.setContext(EmailService.name);
+  }
 
   async sendTemplateEmail(
     to: string,
@@ -42,8 +48,9 @@ export class EmailService {
         subject,
         html,
       });
+      this.logger.debug('Email sent successfully', { to, subject, html });
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error('Error sending email', error as Record<string, any>);
       throw new Error('Failed to send email. Please try again later.');
     }
   }
