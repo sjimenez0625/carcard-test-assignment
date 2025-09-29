@@ -1,3 +1,4 @@
 export enum EMAIL_TEMPLATES {
-  TRANSACTION_UPDATE = 'transaction-update',
+  TRANSACTION_SUCCESS = 'transaction-success',
+  TRANSACTION_SUSPICIOUS = 'transaction-suspicious',
 }

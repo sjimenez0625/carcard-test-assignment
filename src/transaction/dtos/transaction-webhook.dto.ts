@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 import { TRANSACTION_TYPE } from '../constants/transaction.constant';
 
 export class TransactionWebhookDto {
@@ -14,7 +20,7 @@ export class TransactionWebhookDto {
   @IsEnum(TRANSACTION_TYPE)
   type: TRANSACTION_TYPE;
 
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
   userEmail: string;
 }
