@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './services/email.service';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   imports: [
+    SharedModule,
     MailerModule.forRoot({
       transport: {
         host: process.env.SMTP_HOST || '',
