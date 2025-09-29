@@ -18,11 +18,16 @@ export class TransactionService {
       emailTemplate = EMAIL_TEMPLATES.TRANSACTION_SUSPICIOUS;
     }
 
-    await this.emailService.sendTemplateEmail(
-      transaction.userEmail,
-      emailSubject,
-      emailTemplate,
-      { amount: transaction.amount },
-    );
+    try {
+      await this.emailService.sendTemplateEmail(
+        transaction.userEmail,
+        emailSubject,
+        emailTemplate,
+        { amount: transaction.amount },
+      );
+    } catch (error) {
+      console.error('Error processing transaction:', error);
+      throw new Error('Failed to process transaction. Please try again later.');
+    }
   }
 }

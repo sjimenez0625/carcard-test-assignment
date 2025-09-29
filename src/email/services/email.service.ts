@@ -8,44 +8,43 @@ import { EMAIL_TEMPLATES } from '../constants/email.constant';
 export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async sendEmail(
-    to: string,
-    subject: string,
-    text: string,
-    html?: string,
-  ): Promise<void> {
-    await this.mailerService.sendMail({
-      to,
-      subject,
-      text,
-      html,
-    });
-  }
-
   async sendTemplateEmail(
     to: string,
     subject: string,
     template: EMAIL_TEMPLATES,
     context: Record<string, any>,
   ): Promise<void> {
-    const templatePath = path.join(
-      __dirname,
-      '..',
-      'templates',
-      `${template}.html`,
-    );
-    const templateFile = fs.readFileSync(templatePath, 'utf-8');
+    try {
+      const templatePath = path.join(
+        __dirname,
+        '..',
+        'templates',
+        `${template}.html`,
+      );
 
-    const html = templateFile.replace(
-      /{{(\w+)}}/g,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      (_, key) => context[key] || '',
-    );
+      if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template file not found: ${templatePath}`);
+      }
 
-    await this.mailerService.sendMail({
-      to,
-      subject,
-      html,
-    });
+      const templateFile = fs.readFileSync(templatePath, 'utf-8');
+
+      const html = templateFile.replace(/{{(\w+)}}/g, (_, key: string) => {
+        if (!context[key]) {
+          console.warn(`Missing or invalid context key: ${key}`);
+          return '';
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return context[key];
+      });
+
+      await this.mailerService.sendMail({
+        to,
+        subject,
+        html,
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Failed to send email. Please try again later.');
+    }
   }
 }
